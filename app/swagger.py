@@ -43,7 +43,11 @@ template = {
                                     "type": "string"
                                 },
                                 "password": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "Password must be at least 8 characters long, contain at least one number and one uppercase letter",
+                                    "minLength": 8,
+                                    "pattern": "^(?=.*[A-Z])(?=.*\\d).+$",
+                                    "example": "Password123"
                                 }
                             }
                         }
@@ -76,7 +80,11 @@ template = {
                                     "type": "string"
                                 },
                                 "password": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "Password must be at least 8 characters long, contain at least one number and one uppercase letter",
+                                    "minLength": 8,
+                                    "pattern": "^(?=.*[A-Z])(?=.*\\d).+$",
+                                    "example": "Password123"
                                 }
                             }
                         }
@@ -116,7 +124,11 @@ template = {
                                     "type": "string"
                                 },
                                 "password": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "Password must be at least 8 characters long, contain at least one number and one uppercase letter",
+                                    "minLength": 8,
+                                    "pattern": "^(?=.*[A-Z])(?=.*\\d).+$",
+                                    "example": "Password123"
                                 }
                             }
                         }
