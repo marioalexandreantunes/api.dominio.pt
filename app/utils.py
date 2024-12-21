@@ -2,8 +2,15 @@ import datetime
 import re
 import html
 import bcrypt
-from flask import jsonify
+from flask import jsonify, request
 from typing import Any, Dict
+from collections import defaultdict
+import time
+
+# Rastreia tentativas de login falhadas
+failed_attempts = defaultdict(list)
+BLOCK_TIME = 900  # 15 minutos em segundos
+MAX_ATTEMPTS = 5  # Número máximo de tentativas antes do bloqueio
 
 def sanitize_input(value: str) -> str:
     """Sanitiza qualquer string de entrada para prevenir ataques XSS e de injeção."""
@@ -63,6 +70,44 @@ def verify_password(password: str, hashed: str) -> bool:
         hashed_pwd = hashed.encode('utf-8')
         
     return bcrypt.checkpw(pwd, hashed_pwd)
+
+def is_ip_blocked(ip: str) -> tuple[bool, int]:
+    """
+    Verifica se um IP está bloqueado e por quanto tempo.
+    Retorna (está_bloqueado, tempo_restante_em_segundos)
+    """
+    if ip not in failed_attempts:
+        return False, 0
+    
+    attempts = failed_attempts[ip]
+    if len(attempts) < MAX_ATTEMPTS:
+        return False, 0
+    
+    # Clean up old attempts
+    current_time = time.time()
+    attempts = [t for t in attempts if current_time - t < BLOCK_TIME]
+    failed_attempts[ip] = attempts
+    
+    if len(attempts) >= MAX_ATTEMPTS:
+        newest_attempt = max(attempts)
+        block_remaining = int(BLOCK_TIME - (current_time - newest_attempt))
+        return True, max(0, block_remaining)
+    
+    return False, 0
+
+def record_failed_attempt(ip: str):
+    """Regista uma tentativa de login falhada para um IP"""
+    current_time = time.time()
+    # Clean up old attempts
+    attempts = failed_attempts.get(ip, [])
+    attempts = [t for t in attempts if current_time - t < BLOCK_TIME]
+    attempts.append(current_time)
+    failed_attempts[ip] = attempts
+
+def clear_failed_attempts(ip: str):
+    """Limpa as tentativas falhadas para um IP após login bem-sucedido"""
+    if ip in failed_attempts:
+        del failed_attempts[ip]
 
 # Função para padronizar as respostas da API
 # Parâmetros:
