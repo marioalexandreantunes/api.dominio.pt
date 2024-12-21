@@ -96,18 +96,25 @@ Authorization: Bearer <seu-token>
 - Configuração de variáveis sensíveis via arquivo .env
 - Inclusão do .env no .gitignore para proteção de credenciais
 - Documentação clara sobre configurações de segurança
+- Sistema robusto de rate limiting com limites específicos por rota:
+  - Limites base: 100/dia, 30/hora, 5/minuto
+  - Limites personalizados para endpoints sensíveis
+  - Headers informativos sobre limites e tempo de espera
+- Proteção avançada contra ataques de força bruta:
+  - Bloqueio de IP após 3 tentativas falhadas
+  - Tempo de bloqueio de 30 minutos
+  - Limpeza automática de tentativas antigas
+  - Logging de tentativas suspeitas
+- Sistema de logging detalhado para auditoria de segurança
+- Proteção contra ataques XSS através de sanitização de inputs
+- Hash seguro de senhas com bcrypt
 
 ### ⚠️ Pontos a Melhorar
-- Implementar rate limiting para prevenir ataques de força bruta
-- Adicionar logging detalhado para auditoria de segurança
 - Implementar refresh tokens para melhor gestão de sessões
 - Configurar CORS de forma mais restritiva
 - Adicionar validação adicional para inputs complexos
-- Implementar proteção contra ataques XSS nos endpoints
-- Adicionar hash e salt nas senhas armazenadas
 - Implementar sistema de backup seguro para a base de dados
 - Adicionar monitorização de segurança em tempo real
-- Implementar sistema de notificação para tentativas de acesso suspeitas
 
 ## ⚙️ Configuração do Ambiente
 

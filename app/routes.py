@@ -46,7 +46,7 @@ users_collection = db["User"]
 # Rotas
 # Rota para verificar o status da API e conexão com o banco de dados
 @api_bp.route("/", methods=["GET"])
-@limiter.limit("1 per minute")  # Limite de 1 requisição por minuto
+@limiter.limit("10 per minute")  # Limite de 10 requisições por minuto para status check
 def status():
     logging.info("route '/' status()")
     try:
@@ -59,7 +59,7 @@ def status():
 # Rota para criar o primeiro usuário administrador (superuser)
 # Só pode ser usado uma vez quando não existem usuários no sistema
 @api_bp.route("/createsuperuser", methods=["POST"])
-@limiter.limit("2 per hour")  # Limite de 2 requisições por hora
+@limiter.limit("3 per day")  # Limite mais restrito para criação de superusuário
 @validate_request('registration')
 def createsuperuser():
     logging.info("route '/createsuperuser' createsuperuser()")
@@ -85,7 +85,7 @@ def createsuperuser():
 # Rota para autenticação de utilizadores
 # Retorna um token JWT válido por 7 minutos se as credenciais estiverem corretas
 @api_bp.route("/login", methods=["POST"])
-@limiter.limit("5 per minute")  # Limite rigoroso para tentativas de login
+@limiter.limit("5 per minute, 20 per hour")  # Limite rigoroso para tentativas de login
 @validate_request('login')
 def login():
     logging.info("route '/login' login()")
@@ -126,6 +126,7 @@ def login():
 # Requer autenticação JWT (token válido)
 @api_bp.route("/cadastro", methods=["POST"])
 @jwt_required()
+@limiter.limit("20 per hour")  # Limite para criação de novos usuários
 @validate_request('registration')
 def cadastro():
     logging.info("route '/cadastro' cadastro()")
@@ -150,6 +151,7 @@ def cadastro():
 # Remove informações sensíveis (palavra-passe e ID) antes de retornar
 @api_bp.route("/cadastros", methods=["GET"])
 @jwt_required()
+@limiter.limit("30 per minute")  # Limite para listagem de usuários
 def cadastros():
     logging.info("route '/cadastros' cadastros()")
     user_from_db = users_collection.find()
@@ -167,7 +169,16 @@ def cadastros():
 @api_bp.errorhandler(429)
 def ratelimit_handler(e):
     logging.info("ratelimit_handler()" + str(e))
-    return response(str(e), "Demasiadas Requisições", 429)
+    retry_after = e.description.split('in')[1].strip() if 'in' in e.description else '60 seconds'
+    return response(
+        {
+            "error": "rate_limit_exceeded",
+            "retry_after": retry_after,
+            "message": str(e)
+        },
+        "Demasiadas Requisições. Por favor, tente novamente mais tarde.",
+        429
+    )
 
 # Tratamento de erro para rotas não encontradas (404)
 @api_bp.errorhandler(404)

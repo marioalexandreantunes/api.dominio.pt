@@ -152,17 +152,23 @@ def add_security_headers(response):
 # Previne abusos limitando o número de requisições por IP
 limiter = Limiter(
     key_func=get_remote_address,  # Usa o IP como identificador
-    storage_uri="memory://",  # Armazena contadores na memória (outras opções: redis://, memcached://, etc. para persistência e escalabilidade)
-    application_limits=["1 per second"]  # Limite padrão de 2 requisições por minuto
+    storage_uri="memory://",  # Armazena contadores na memória
+    default_limits=["100 per day", "30 per hour", "5 per minute"],  # Limites padrão globais
+    strategy="fixed-window-elastic-expiry",  # Estratégia mais robusta para contagem
+    headers_enabled=True,  # Habilita headers de rate limit na resposta
+    swallow_errors=True,  # Continua funcionando mesmo se houver erros no storage
+    retry_after="http-date"  # Formato do header Retry-After
 )
 
 # Aplica o limitador à aplicação
 limiter.init_app(api)
 
-# Configura exceção para rotas do Swagger UI
+# Configura exceções para rotas específicas
 @limiter.request_filter
 def limiter_filter():
-    return request.path.startswith('/api/docs')
+    # Ignora rate limiting para documentação e health checks
+    return request.path.startswith('/api/docs') or \
+           request.path.startswith('/api/v1/health')
 
 # Importação das rotas após inicialização do limitador
 # Importante: evita problemas de importação circular

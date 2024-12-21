@@ -2,15 +2,18 @@ import datetime
 import re
 import html
 import bcrypt
+import logging
 from flask import jsonify
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 from collections import defaultdict
 import time
 
-# Rastreia tentativas de login falhadas
+# Configuração para proteção contra força bruta
 failed_attempts = defaultdict(list)
-BLOCK_TIME = 900  # 15 minutos em segundos
-MAX_ATTEMPTS = 5  # Número máximo de tentativas antes do bloqueio
+BLOCK_TIME = 1800  # 30 minutos em segundos
+MAX_ATTEMPTS = 3   # Número máximo de tentativas antes do bloqueio
+CLEANUP_INTERVAL = 300  # Limpa tentativas antigas a cada 5 minutos
+last_cleanup = time.time()
 
 def sanitize_input(value: str) -> str:
     """Sanitiza qualquer string de entrada para prevenir ataques XSS e de injeção."""
@@ -71,7 +74,7 @@ def verify_password(password: str, hashed: str) -> bool:
         
     return bcrypt.checkpw(pwd, hashed_pwd)
 
-def is_ip_blocked(ip: str) -> tuple[bool, int]:
+def is_ip_blocked(ip: str) -> Tuple[bool, int]:
     """
     Verifica se um IP está bloqueado e por quanto tempo.
     Retorna (está_bloqueado, tempo_restante_em_segundos)
@@ -83,10 +86,21 @@ def is_ip_blocked(ip: str) -> tuple[bool, int]:
     if len(attempts) < MAX_ATTEMPTS:
         return False, 0
     
-    # Clean up old attempts
+    global last_cleanup
     current_time = time.time()
+    
+    # Limpa tentativas antigas periodicamente para todos os IPs
+    if current_time - last_cleanup > CLEANUP_INTERVAL:
+        cleanup_old_attempts()
+        last_cleanup = current_time
+    
+    # Limpa tentativas antigas para este IP específico
     attempts = [t for t in attempts if current_time - t < BLOCK_TIME]
     failed_attempts[ip] = attempts
+    
+    # Registra tentativas suspeitas
+    if len(attempts) >= MAX_ATTEMPTS - 1:
+        logging.warning(f"Múltiplas tentativas de login detectadas do IP: {ip}")
     
     if len(attempts) >= MAX_ATTEMPTS:
         newest_attempt = max(attempts)
@@ -95,19 +109,33 @@ def is_ip_blocked(ip: str) -> tuple[bool, int]:
     
     return False, 0
 
+def cleanup_old_attempts():
+    """Limpa tentativas antigas de todos os IPs"""
+    current_time = time.time()
+    for ip in list(failed_attempts.keys()):
+        attempts = [t for t in failed_attempts[ip] if current_time - t < BLOCK_TIME]
+        if attempts:
+            failed_attempts[ip] = attempts
+        else:
+            del failed_attempts[ip]
+
 def record_failed_attempt(ip: str):
     """Regista uma tentativa de login falhada para um IP"""
     current_time = time.time()
-    # Clean up old attempts
     attempts = failed_attempts.get(ip, [])
     attempts = [t for t in attempts if current_time - t < BLOCK_TIME]
     attempts.append(current_time)
     failed_attempts[ip] = attempts
+    
+    # Log de tentativas suspeitas
+    if len(attempts) >= MAX_ATTEMPTS:
+        logging.warning(f"IP bloqueado após {MAX_ATTEMPTS} tentativas falhadas: {ip}")
 
 def clear_failed_attempts(ip: str):
     """Limpa as tentativas falhadas para um IP após login bem-sucedido"""
     if ip in failed_attempts:
         del failed_attempts[ip]
+        logging.info(f"Tentativas de login resetadas para IP após sucesso: {ip}")
 
 # Função para padronizar as respostas da API
 # Parâmetros:
