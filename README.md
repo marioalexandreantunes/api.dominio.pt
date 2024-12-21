@@ -93,6 +93,9 @@ Authorization: Bearer <seu-token>
 - Ambiente virtual isolado para dependências
 - Utilização de HTTPS para comunicação segura
 - Estrutura modular que facilita a manutenção segura
+- Configuração de variáveis sensíveis via arquivo .env
+- Inclusão do .env no .gitignore para proteção de credenciais
+- Documentação clara sobre configurações de segurança
 
 ### ⚠️ Pontos a Melhorar
 - Implementar rate limiting para prevenir ataques de força bruta
@@ -100,6 +103,11 @@ Authorization: Bearer <seu-token>
 - Implementar refresh tokens para melhor gestão de sessões
 - Configurar CORS de forma mais restritiva
 - Adicionar validação adicional para inputs complexos
+- Implementar proteção contra ataques XSS nos endpoints
+- Adicionar hash e salt nas senhas armazenadas
+- Implementar sistema de backup seguro para a base de dados
+- Adicionar monitorização de segurança em tempo real
+- Implementar sistema de notificação para tentativas de acesso suspeitas
 
 ## ⚙️ Configuração do Ambiente
 
