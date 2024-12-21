@@ -20,7 +20,6 @@ from app import limiter
 
 # Importações do MongoDB
 from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
 
 # Importações para autenticação JWT
 from flask_jwt_extended import (
@@ -33,7 +32,13 @@ api_bp = Blueprint('api', __name__)
 
 # Configuração da conexão com o MongoDB
 uri = os.getenv("DATABASE_URL")
-client = MongoClient(uri, server_api=ServerApi("1"))
+#client = MongoClient(uri, server_api=ServerApi("1"))
+client = MongoClient(
+    uri,
+    maxPoolSize=50,
+    waitQueueTimeoutMS=2500,
+    serverSelectionTimeoutMS=5000
+)
 db = client["Cluster0"]
 users_collection = db["User"]
 
