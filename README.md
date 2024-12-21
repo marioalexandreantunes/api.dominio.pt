@@ -106,31 +106,23 @@ Authorization: Bearer <seu-token>
 Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 
 ```env
-# Configuração do Servidor
-FLASK_APP=run.py
-FLASK_ENV=development
-PORT=5000
-DEBUG=True
+# Configuração da Base de Dados MongoDB
+DATABASE_URL="sua_url_de_conexao_mongodb"
 
-# Configuração do MongoDB
-MONGO_URI=mongodb://localhost:27017/nome_da_base_dados
+# Configuração do Servidor
+PORT_DEBUG=5000    # Porta onde o servidor irá executar
+DEBUG=true         # Modo de debug (true/false)
 
 # Configuração JWT
-JWT_SECRET_KEY=sua_chave_secreta_muito_segura
-JWT_ACCESS_TOKEN_EXPIRES=3600  # tempo em segundos (1 hora)
-
-# Configuração de Email (opcional)
-SMTP_SERVER=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=seu_email@gmail.com
-SMTP_PASSWORD=sua_senha_de_app
-
-# Configuração de Segurança
-CORS_ORIGINS=http://localhost:3000,http://localhost:5000
-RATE_LIMIT=100  # requisições por minuto
+JWT_SECRET_KEY=sua_chave_secreta_jwt_muito_segura    # Chave secreta para assinatura dos tokens
+TOKEN_HEADER_KEY=x-access-token                      # Nome do header para o token JWT
 ```
 
-**Nota**: Nunca compartilhe seu arquivo `.env` ou credenciais sensíveis. Certifique-se de que o `.env` está incluído no `.gitignore`.
+**Importante**:
+1. Substitua `sua_url_de_conexao_mongodb` pela URL de conexão do seu cluster MongoDB
+2. Gere uma chave secreta forte para `JWT_SECRET_KEY` (recomendado: mínimo 64 caracteres)
+3. Nunca compartilhe seu arquivo `.env` ou credenciais sensíveis
+4. Certifique-se de que o `.env` está incluído no `.gitignore`
 
 ## 🤝 Contribuições
 
