@@ -2,7 +2,7 @@ import datetime
 import re
 import html
 import bcrypt
-from flask import jsonify, request
+from flask import jsonify
 from typing import Any, Dict
 from collections import defaultdict
 import time
