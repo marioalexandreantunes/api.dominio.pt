@@ -39,7 +39,7 @@ api.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(minutes=7)  # Tempo 
 limiter = Limiter(
     key_func=get_remote_address,  # Usa o IP como identificador
     storage_uri="memory://",  # Armazena contadores na memória (outras opções: redis://, memcached://, etc. para persistência e escalabilidade)
-    application_limits=["2 per minute"]  # Limite padrão de 2 requisições por minuto
+    application_limits=["1 per second"]  # Limite padrão de 2 requisições por minuto
 )
 
 # Aplica o limitador à aplicação

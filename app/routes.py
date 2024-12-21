@@ -6,6 +6,7 @@ import datetime # Para manipulação de datas
 
 # Importações do Flask e extensões
 from flask import Blueprint, request
+from app.validators import validate_request
 from app.utils import response
 from app import limiter
 
@@ -45,7 +46,8 @@ def status():
 # Rota para criar o primeiro usuário administrador (superuser)
 # Só pode ser usado uma vez quando não existem usuários no sistema
 @api_bp.route("/createsuperuser", methods=["POST"])
-@limiter.limit("1 per hour")  # Limite de 1 requisição por hora
+@limiter.limit("2 per hour")  # Limite de 1 requisição por hora
+@validate_request('registration')
 def createsuperuser():
     logging.info("route '/createsuperuser' createsuperuser()")
     new_user = request.get_json()  # store the json body request
@@ -68,6 +70,7 @@ def createsuperuser():
 # Rota para autenticação de usuários
 # Retorna um token JWT válido por 7 minutos se as credenciais estiverem corretas
 @api_bp.route("/login", methods=["POST"])
+@validate_request('login')
 def login():
     logging.info("route '/login' login()")
     login_details = request.get_json()
@@ -90,6 +93,7 @@ def login():
 # Requer autenticação JWT (token válido)
 @api_bp.route("/cadastro", methods=["POST"])
 @jwt_required()
+@validate_request('registration')
 def cadastro():
     logging.info("route '/cadastro' cadastro()")
     new_user = request.get_json()  # store the json body request
