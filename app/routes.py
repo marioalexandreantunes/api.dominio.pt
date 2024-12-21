@@ -1,13 +1,18 @@
 # Importações necessárias
 import logging  # Para registro de logs
 import os      # Para variáveis de ambiente
-import hashlib # Para criptografia de senhas
 import datetime # Para manipulação de datas
 
 # Importações do Flask e extensões
 from flask import Blueprint, request
 from app.validators import validate_request
-from app.utils import response
+from app.utils import (
+    response, 
+    sanitize_document, 
+    sanitize_email, 
+    hash_password,
+    verify_password
+)
 from app import limiter
 
 # Importações do MongoDB
@@ -55,9 +60,11 @@ def createsuperuser():
         one = users_collection.count_documents({})
         print("How many exist?", one)
         if one == 0:
-            new_user["password"] = hashlib.sha256(
-                new_user["password"].encode("utf-8")
-            ).hexdigest()  # encrpt password
+            # Sanitize input
+            new_user = sanitize_document(new_user)
+            new_user["email"] = sanitize_email(new_user["email"])
+            # Hash password
+            new_user["password"] = hash_password(new_user["password"])
             users_collection.insert_one(new_user)
             print(new_user)
             del new_user["_id"]
@@ -74,12 +81,13 @@ def createsuperuser():
 def login():
     logging.info("route '/login' login()")
     login_details = request.get_json()
-    user_from_db = users_collection.find_one({"email": login_details["email"]})
+    # Sanitize input
+    login_details = sanitize_document(login_details)
+    email = sanitize_email(login_details["email"])
+    
+    user_from_db = users_collection.find_one({"email": email})
     if user_from_db:
-        encrpted_password = hashlib.sha256(
-            login_details["password"].encode("utf-8")
-        ).hexdigest()
-        if encrpted_password == user_from_db["password"]:
+        if verify_password(login_details["password"], user_from_db["password"]):
             access_token = create_access_token(
                 identity=user_from_db["email"],
                 expires_delta=datetime.timedelta(minutes=7),
@@ -97,9 +105,12 @@ def login():
 def cadastro():
     logging.info("route '/cadastro' cadastro()")
     new_user = request.get_json()  # store the json body request
-    new_user["password"] = hashlib.sha256(
-        new_user["password"].encode("utf-8")
-    ).hexdigest()  # encrpt password
+    # Sanitize input
+    new_user = sanitize_document(new_user)
+    new_user["email"] = sanitize_email(new_user["email"])
+    # Hash password
+    new_user["password"] = hash_password(new_user["password"])
+    
     doc = users_collection.find_one({"email": new_user["email"]})  # check if user exist
     if not doc:
         users_collection.insert_one(new_user)

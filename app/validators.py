@@ -15,25 +15,25 @@ class UserValidator(Validator):
     def validate_registration(self, data):
         errors = []
         
-        # Validate email
+        # Validar email
         if not data.get('email'):
-            errors.append("Email is required")
+            errors.append("O email é obrigatório")
         elif not self._is_valid_email(data['email']):
-            errors.append("Invalid email format")
+            errors.append("Formato de email inválido")
             
-        # Validate password
+        # Validar palavra-passe
         if not data.get('password'):
-            errors.append("Password is required")
+            errors.append("A palavra-passe é obrigatória")
         elif len(data['password']) < 8:
-            errors.append("Password must be at least 8 characters long")
+            errors.append("A palavra-passe deve ter pelo menos 8 caracteres")
         elif not any(char.isdigit() for char in data['password']):
-            errors.append("Password must contain at least one number")
+            errors.append("A palavra-passe deve conter pelo menos um número")
         elif not any(char.isupper() for char in data['password']):
-            errors.append("Password must contain at least one uppercase letter")
+            errors.append("A palavra-passe deve conter pelo menos uma letra maiúscula")
             
-        # Validate name if required
+        # Validar nome se fornecido
         if 'name' in data and not data['name']:
-            errors.append("Name cannot be empty if provided")
+            errors.append("O nome não pode estar vazio se fornecido")
             
         if errors:
             raise ValidateError(errors)
@@ -41,15 +41,15 @@ class UserValidator(Validator):
     def validate_login(self, data):
         errors = []
         
-        # Validate email
+        # Validar email
         if not data.get('email'):
-            errors.append("Email is required")
+            errors.append("O email é obrigatório")
         elif not self._is_valid_email(data['email']):
-            errors.append("Invalid email format")
+            errors.append("Formato de email inválido")
             
-        # Validate password
+        # Validar palavra-passe
         if not data.get('password'):
-            errors.append("Password is required")
+            errors.append("A palavra-passe é obrigatória")
             
         if errors:
             raise ValidateError(errors)
@@ -59,10 +59,10 @@ class UserValidator(Validator):
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return re.match(pattern, email) is not None
 
-# Create validator instance
+# Criar instância do validador
 user_validator = UserValidator()
 
-# Decorator for request validation
+# Decorador para validação de pedidos
 def validate_request(validation_type):
     def decorator(f):
         @wraps(f)
@@ -77,13 +77,13 @@ def validate_request(validation_type):
             except ValidateError as e:
                 return jsonify({
                     'status': 'error',
-                    'message': 'Validation failed',
+                    'message': 'A validação falhou',
                     'errors': e.args[0]
                 }), 400
             except Exception as e:
                 return jsonify({
                     'status': 'error',
-                    'message': 'Invalid request data',
+                    'message': 'Dados do pedido inválidos',
                     'error': str(e)
                 }), 400
         return decorated_function
