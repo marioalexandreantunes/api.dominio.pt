@@ -101,6 +101,37 @@ Authorization: Bearer <seu-token>
 - Configurar CORS de forma mais restritiva
 - Adicionar validação adicional para inputs complexos
 
+## ⚙️ Configuração do Ambiente
+
+Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+
+```env
+# Configuração do Servidor
+FLASK_APP=run.py
+FLASK_ENV=development
+PORT=5000
+DEBUG=True
+
+# Configuração do MongoDB
+MONGO_URI=mongodb://localhost:27017/nome_da_base_dados
+
+# Configuração JWT
+JWT_SECRET_KEY=sua_chave_secreta_muito_segura
+JWT_ACCESS_TOKEN_EXPIRES=3600  # tempo em segundos (1 hora)
+
+# Configuração de Email (opcional)
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=seu_email@gmail.com
+SMTP_PASSWORD=sua_senha_de_app
+
+# Configuração de Segurança
+CORS_ORIGINS=http://localhost:3000,http://localhost:5000
+RATE_LIMIT=100  # requisições por minuto
+```
+
+**Nota**: Nunca compartilhe seu arquivo `.env` ou credenciais sensíveis. Certifique-se de que o `.env` está incluído no `.gitignore`.
+
 ## 🤝 Contribuições
 
 Contribuições são bem-vindas! Por favor, sinta-se à vontade para submeter um Pull Request.
