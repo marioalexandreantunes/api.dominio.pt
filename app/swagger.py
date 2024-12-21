@@ -40,7 +40,10 @@ template = {
                             "type": "object",
                             "properties": {
                                 "email": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "Must be a valid email address",
+                                    "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                                    "example": "user@example.com"
                                 },
                                 "password": {
                                     "type": "string",
@@ -56,6 +59,9 @@ template = {
                 "responses": {
                     "201": {
                         "description": "Usuário criado com sucesso"
+                    },
+                    "400": {
+                        "description": "Validation failed (invalid email format, password requirements not met)"
                     },
                     "409": {
                         "description": "Usuário já existe"
@@ -77,7 +83,10 @@ template = {
                             "type": "object",
                             "properties": {
                                 "email": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "Must be a valid email address",
+                                    "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                                    "example": "user@example.com"
                                 },
                                 "password": {
                                     "type": "string",
@@ -85,6 +94,11 @@ template = {
                                     "minLength": 8,
                                     "pattern": "^(?=.*[A-Z])(?=.*\\d).+$",
                                     "example": "Password123"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "description": "Optional user name. If provided, cannot be empty",
+                                    "minLength": 1
                                 }
                             }
                         }
@@ -93,6 +107,9 @@ template = {
                 "responses": {
                     "200": {
                         "description": "Login realizado com sucesso"
+                    },
+                    "400": {
+                        "description": "Validation failed (invalid email format)"
                     },
                     "401": {
                         "description": "Email ou senha incorretos"
@@ -121,7 +138,10 @@ template = {
                             "type": "object",
                             "properties": {
                                 "email": {
-                                    "type": "string"
+                                    "type": "string",
+                                    "description": "Must be a valid email address",
+                                    "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                                    "example": "user@example.com"
                                 },
                                 "password": {
                                     "type": "string",
@@ -137,6 +157,9 @@ template = {
                 "responses": {
                     "201": {
                         "description": "Usuário criado com sucesso"
+                    },
+                    "400": {
+                        "description": "Validation failed (invalid email format, password requirements not met)"
                     },
                     "409": {
                         "description": "Email já existe"
